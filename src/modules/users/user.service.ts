@@ -48,8 +48,14 @@ const updateUser = async (userId: string, payload: Record<string, unknown>) => {
 
 
 const deleteUser = async (id: string) => {
-  const result = await pool.query(`DELETE FROM users WHERE id=$1`, [id]);
-  return result;
+
+  const isDataExist = await pool.query(`SELECT * FROM users WHERE id=$1`, [id]);
+  if (isDataExist.rows.length === 0) {
+    throw new Error("User not found");
+  }
+
+  const result = await pool.query(`DELETE FROM users WHERE id=$1`, [id]);  
+  return result.rows[0];
 };
 
 

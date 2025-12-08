@@ -9,7 +9,7 @@ const getUsers = async (req: Request, res: Response) => {
     const result = await userService.getUsers();
     res.status(200).json({
       success: true,
-      message : "Users retrieved successfully",
+      message: "Users retrieved successfully",
       data: result,
     });
   } catch (err: any) {
@@ -44,7 +44,7 @@ const getUserById = async (req: Request, res: Response) => {
 };
 
 const updateUser = async (req: Request, res: Response) => {
-  const currentUserId = (req.user as JwtPayload).userId;  
+  const currentUserId = (req.user as JwtPayload).userId;
   if (currentUserId !== Number(req.params.userId) && (req.user as JwtPayload).role !== "admin") {
     return res.status(403).json({
       success: false,
@@ -75,16 +75,10 @@ const updateUser = async (req: Request, res: Response) => {
   }
 };
 
+
 const deleteUser = async (req: Request, res: Response) => {
   try {
-    const result = await userService.deleteUser(req.params.id as string);
-
-    if (!result) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found",
-      });
-    }
+    await userService.deleteUser(req.params.userId as string);
 
     res.status(200).json({
       success: true,
