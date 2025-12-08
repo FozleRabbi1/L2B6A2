@@ -46,8 +46,48 @@ const getAllVehicles = async () => {
     };
 };
 
+const getSingleVehicle = async (vehicleId: string) => {
+    const result = await pool.query(`SELECT * FROM vehicles WHERE id = $1`, [vehicleId]);
+    return result.rows[0];
+};
+
+const updateSingleVehicle = async (vehicleId: string, payload: Record<string, unknown>) => {
+    const id = Number(vehicleId);
+    if (isNaN(id)) throw new Error("Invalid vehicle ID");
+
+    const check = await pool.query("SELECT * FROM vehicles WHERE id = $1", [id]);
+    if (check.rows.length === 0) throw new Error("Vehicle not found");
+
+    const allowed = [
+        "vehicle_name",
+        "type",
+        "registration_number",
+        "daily_rent_price",
+        "availability_status"
+    ];
+
+    const entries = Object.entries(payload).filter(([key]) => allowed.includes(key));
+    if (entries.length === 0) throw new Error("No valid fields provided for update");
+
+    const setQuery = entries.map(([key], i) => `${key} = $${i + 1}`).join(", ");
+    const values = entries.map(([, value]) => value);
+
+    const query = `
+        UPDATE vehicles
+        SET ${setQuery}, updated_at = NOW()
+        WHERE id = $${entries.length + 1}
+        RETURNING *
+    `;
+
+    const result = await pool.query(query, [...values, id]);
+    return result.rows[0];
+};
+
+
 
 export const VehicleService = {
     createVehicle,
     getAllVehicles,
+    getSingleVehicle,
+    updateSingleVehicle,
 };
