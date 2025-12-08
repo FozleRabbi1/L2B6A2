@@ -18,31 +18,39 @@ const createUser = async (payload: Record<string, unknown>) => {
     [name, email, role, hashPass, phone]
   );
 
-  return result.rows[0];
+  const data = {
+    id: result.rows[0].id,
+    name: result.rows[0].name,
+    email: result.rows[0].email,
+    phone: result.rows[0].phone,
+    role: result.rows[0].role,
+  }
+
+  return data;
 };
 
 
 const login = async (payload: { email: string; password: string }) => {
-    const userData = await pool.query(`SELECT * FROM users WHERE email = $1`, [payload.email]);
-    const data = userData.rows[0];
+  const userData = await pool.query(`SELECT * FROM users WHERE email = $1`, [payload.email]);
+  const data = userData.rows[0];
 
-    if (!data) {
-        throw new Error("User not found");
-    }
-    const isPasswordValid = await bcrypt.compare(payload.password, data.password);
+  if (!data) {
+    throw new Error("User not found");
+  }
+  const isPasswordValid = await bcrypt.compare(payload.password, data.password);
 
-    if (!isPasswordValid) {
-        throw new Error("Invalid credentials");
-    }
+  if (!isPasswordValid) {
+    throw new Error("Invalid credentials");
+  }
 
-    const token = jwt.sign({ userId: data.id, email: data.email, role : data.role }, config.jwt_secret as string, { expiresIn: "1h" });
+  const token = jwt.sign({ userId: data.id, email: data.email, role: data.role }, config.jwt_secret as string, { expiresIn: "1h" });
 
-    return {token, data : { id: data.id, name: data.name, email: data.email, phone : data.phone , role: data.role }} ;
+  return { token, data: { id: data.id, name: data.name, email: data.email, phone: data.phone, role: data.role } };
 }
 
 
 
 export const AuthService = {
-    createUser,
-    login,
+  createUser,
+  login,
 };
