@@ -4,9 +4,9 @@ import { Auth } from "../../middleware/Auth";
 
 const router = express.Router();
 
-router.get("/", Auth(["admin", "user"]), userController.getUsers);
+router.get("/", Auth(["admin"]), userController.getUsers);
 router.get("/:id", userController.getUserById);
-router.put("/:id", userController.updateUser);
-router.delete("/:id", userController.deleteUser);
+router.put("/:userId", Auth(["admin", "customer"]), userController.updateUser);
+router.delete("/:userId", userController.deleteUser);
 
 export const UserRouter = router;

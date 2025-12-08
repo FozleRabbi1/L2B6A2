@@ -5,12 +5,11 @@ import { JwtPayload } from "jsonwebtoken";
 
 
 const getUsers = async (req: Request, res: Response) => {
-  const data = req.user as JwtPayload;
-  console.log('current user ID == ', data.userId);
   try {
     const result = await userService.getUsers();
     res.status(200).json({
       success: true,
+      message : "Users retrieved successfully",
       data: result,
     });
   } catch (err: any) {
@@ -45,10 +44,16 @@ const getUserById = async (req: Request, res: Response) => {
 };
 
 const updateUser = async (req: Request, res: Response) => {
-  const { name, email } = req.body;
+  const currentUserId = (req.user as JwtPayload).userId;  
+  if (currentUserId !== Number(req.params.userId) && (req.user as JwtPayload).role !== "admin") {
+    return res.status(403).json({
+      success: false,
+      message: "You are not authorized to update this user",
+    });
+  }
 
   try {
-    const result = await userService.updateUser(req.params.id as string, name, email);
+    const result = await userService.updateUser(req.params.userId as string, req.body);
 
     if (!result) {
       return res.status(404).json({
