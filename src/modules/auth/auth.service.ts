@@ -6,6 +6,8 @@ import { config } from "../../config";
 
 
 const createUser = async (payload: Record<string, unknown>) => {
+  console.log(payload);
+  
   const { name, email, role, password, phone } = payload;
   if (!password || typeof password !== "string" || password.length < 6) {
     throw new Error("Password must be at least 6 characters long");
