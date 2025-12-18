@@ -12,7 +12,7 @@ app.use(logger);
 initDB();
 
 app.get("/", logger, (req: Request, res: Response) => {
-  res.send("Hello Next Level Developers!");
+  res.send("Hello Next Level Developers==22!");
 });
 
 app.use("/api/v1", router);
